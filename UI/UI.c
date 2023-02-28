@@ -1,5 +1,6 @@
 #include "UI.h"
 #include "BufferLine/UI_bufferl.h"
+#include "LegendLine/UI_Legendl.h"
 
 #include <ncurses.h>
 
@@ -8,15 +9,16 @@ typedef struct TerminalSize {
     int height;
 } TerminalSize;
 
-TerminalSize terminal_size;
+static TerminalSize terminal_size;
 
 typedef struct UIptrs {
+    WINDOW *legend_line;
     WINDOW *buffer_line;
 } UIptrs;
 
-UIptrs UI_ptrs;
+static UIptrs UI_ptrs;
 
-TerminalSize get_terminal_size() {
+static TerminalSize get_terminal_size() {
     TerminalSize output;
     getmaxyx(stdscr, output.height, output.width);
     return output;
@@ -28,17 +30,20 @@ void init_UI() {
     start_color();
     use_default_colors();
     terminal_size = get_terminal_size();
+    init_UI_legendl(&UI_ptrs.legend_line, terminal_size.width);
     init_UI_bufferl(&UI_ptrs.buffer_line, terminal_size.width, terminal_size.height);
 }
 
 void destroy_UI() {
+    destroy_UI_legendl(UI_ptrs.legend_line);
     destroy_UI_bufferl(UI_ptrs.buffer_line);
 }
 
-void refresh_all() {
+static void refresh_all() {
+    // legend line can't update
     update_UI_bufferl(UI_ptrs.buffer_line, NULL);
-
     refresh();
+    wrefresh(UI_ptrs.legend_line);
     wrefresh(UI_ptrs.buffer_line);
 }
 

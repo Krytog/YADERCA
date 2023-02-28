@@ -12,7 +12,7 @@ enum Colors {
     DEFAULT_COLOR = 2, EMPTY_BUFFER = 3
 };
 
-void init_colors() {
+static void init_colors() {
     init_pair(DEFAULT_COLOR, COLOR_YELLOW, -1);
     init_pair(EMPTY_BUFFER, COLOR_RED, -1);
 }
