@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 project(YADERCA C)
 
-add_compile_options(-m32)
-add_link_options(-m32)
+find_package(Curses REQUIRED)
+include_directories(${CURSES_INCLUDE_DIR})
 
-add_executable(YADERCA main.c)
+add_executable(YADERCA main.c
+        UI/UI.c UI/BufferLine/UI_bufferl.c UI/LegendLine/UI_Legendl.c)
+
+target_link_libraries(YADERCA ${CURSES_LIBRARIES})
