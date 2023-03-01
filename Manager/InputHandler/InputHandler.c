@@ -2,6 +2,9 @@
 
 #include <ncurses.h>
 
+enum {
+    COMMAND_INTO = '\n'
+};
 
 void wait_for_and_handle_input(InfoHolder *info, int *active) {
     int input = getch();
@@ -23,6 +26,10 @@ void wait_for_and_handle_input(InfoHolder *info, int *active) {
             if (info->selected_line > 0) {
                 --info->selected_line;
             }
+            break;
+        }
+        case COMMAND_INTO: {
+            *active = 0;
             break;
         }
     }
