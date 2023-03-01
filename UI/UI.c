@@ -29,6 +29,10 @@ static TerminalSize get_terminal_size() {
 void init_UI() {
     curs_set(0);
     noecho();
+    if (!has_colors()) {
+        perror("The terminal doesn't support colors");
+        exit(EXIT_FAILURE);
+    }
     start_color();
     use_default_colors();
     terminal_size = get_terminal_size();
