@@ -20,12 +20,12 @@ enum DateOffsets {
 static void formate_and_write_date(char *dest, __time_t mod_time) {
     time_t seconds = time(NULL);
     char *src = ctime(&mod_time);
-    struct tm *current_time = localtime(&seconds);
-    struct tm *mod = localtime(&mod_time);
+    int year_now = localtime(&seconds)->tm_year;
+    int year_then  = localtime(&mod_time)->tm_year;
     snprintf(dest, MONTH_SIZE + 2, "%s ", src + MONTH_OFFSET);
     snprintf(dest + MONTH_SIZE + 1, DAY_SIZE + 2, "%s ", src + DAY_OFFSET);
-    if (current_time->tm_year == mod->tm_year) {
-        snprintf(dest + MONTH_SIZE + DAY_SIZE + 2, TIME_SIZE + 1, "%s ", src + TIME_OFFSET);
+    if (year_now == year_then) {
+        snprintf(dest + MONTH_SIZE + DAY_SIZE + 2, TIME_SIZE + 1, "%s", src + TIME_OFFSET);
     } else {
         snprintf(dest + MONTH_SIZE + DAY_SIZE + 2, YEAR_SIZE + 1, "%s", src + YEAR_OFFSET);
     }

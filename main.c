@@ -22,7 +22,7 @@ int main() {
 
     while (active == 1) {
         draw_UI(&info_holder);
-        wait_for_and_handle_input(&info_holder, &active);
+        wait_for_and_handle_input(&path_holder, &info_holder, &active);
     }
 
     destroy_UI();

@@ -1,13 +1,12 @@
 #include "InputHandler.h"
 #include "../Traveler/traveler.h"
-
 #include <ncurses.h>
 
 enum {
     COMMAND_INTO = '\n'
 };
 
-void wait_for_and_handle_input(InfoHolder *info, int *active) {
+void wait_for_and_handle_input(PathHolder *path_holder, InfoHolder *info, int *active) {
     int input = getch();
     switch (input) {
         case 'q': {
@@ -30,7 +29,7 @@ void wait_for_and_handle_input(InfoHolder *info, int *active) {
             break;
         }
         case COMMAND_INTO: {
-            *active = 0;
+            go_into_dir(path_holder, info->entities[info->selected_line].name, info, active);
             break;
         }
     }

@@ -41,6 +41,7 @@ void go_into_dir(PathHolder *path, char *name, InfoHolder *info_holder, int *act
         return;
     }
     info_holder_clean_up(info_holder);
+    info_holder->selected_line = 0;
     info_holder->entities = calloc(size - 1, sizeof(*info_holder->entities));
     for (int i = 1; i < size; ++i) {
         get_info(path, info_holder->entities + i - 1, ent[i], active);

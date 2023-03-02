@@ -128,11 +128,11 @@ static void clear_line(WINDOW *ptr, int cur, int height) {
         return;
     }
     mvwprintw(ptr, 1 + (cur < height - 1 ? cur : height - 1), NAME_L, "%s", selected_background);
+    mvwprintw(ptr, 1 + (cur < height - 1 ? cur : height - 1), 1, "%s", NO_ARROW);
 }
 
 static void clear_before_update(WINDOW *ptr, int cur, int height, int prev) {
-    clear_line(ptr, prev, height);
-    for (int i = 0; i < prev; ++i) {
+    for (int i = 0; i <= height; ++i) {
         clear_line(ptr, i, height);
     }
 }
