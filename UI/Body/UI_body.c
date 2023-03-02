@@ -4,9 +4,6 @@
 #include <stdlib.h>
 #include <dirent.h>
 
-#include <fcntl.h>
-#include <unistd.h>
-
 #define ARROW "->"
 #define NO_ARROW "  "
 
@@ -86,7 +83,7 @@ static void set_begin_and_end(int cur, int lines, int size) {
     }
 }
 
-static void show_entities_name(WINDOW *ptr, int cur, int lines, const Entity *entities, size_t size) {
+static void show_entities_name(WINDOW *ptr, int cur, const Entity *entities) {
         for (int i = begin; i < end; ++i) {
         if (i == cur) {
             mvwprintw(ptr, 1 + i - begin, 1, ARROW);
@@ -100,7 +97,7 @@ static void show_entities_name(WINDOW *ptr, int cur, int lines, const Entity *en
     }
 }
 
-static void show_entities_size(WINDOW *ptr, int cur, int lines, int width, const Entity *entities, size_t size) {
+static void show_entities_size(WINDOW *ptr, int cur, int width, const Entity *entities) {
     for (int i = begin; i < end; ++i) {
         if (i == cur) {
             wattron(ptr, SELECTED_STYLE);
@@ -120,7 +117,7 @@ static void show_entities_size(WINDOW *ptr, int cur, int lines, int width, const
     }
 }
 
-static void show_entities_date(WINDOW *ptr, int cur, int lines, int width, const Entity *entities, size_t size) {
+static void show_entities_date(WINDOW *ptr, int cur, int width, const Entity *entities) {
     for (int i = begin; i < end; ++i) {
         if (i == cur) {
             wattron(ptr, SELECTED_STYLE);
@@ -157,14 +154,11 @@ void update_UI_body(WINDOW *ptr, int terminal_width, int terminal_height, const 
     set_begin_and_end(info->selected_line, height, info->entities_num);
     clear_before_update(ptr, height);
     highlight_line(ptr, info->selected_line);
-    show_entities_name(ptr, info->selected_line, height, info->entities, info->entities_num);
-    show_entities_size(ptr, info->selected_line, height, terminal_width, info->entities, info->entities_num);
-    show_entities_date(ptr, info->selected_line, height, terminal_width, info->entities, info->entities_num);
-
-    int fd = open("log.txt", O_CREAT | O_APPEND | O_WRONLY, S_IRWXU);
-    dprintf(fd, "BEGIN: %d END: %d, CUR: %d\n", begin, end, info->selected_line);
-    close(fd);
+    show_entities_name(ptr, info->selected_line, info->entities);
+    show_entities_size(ptr, info->selected_line, terminal_width, info->entities);
+    show_entities_date(ptr, info->selected_line, terminal_width, info->entities);
 }
+
 void destroy_UI_body(WINDOW *ptr) {
     delwin(ptr);
     free(selected_background);
