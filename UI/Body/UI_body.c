@@ -7,14 +7,16 @@
 #define ARROW "->"
 #define NO_ARROW "  "
 
-#define SELECTED_STYLE COLOR_PAIR(SELECTED) | A_BOLD
-
 enum Offsets {
     HEIGHT = 3, NAME_L = 3, MODIFIED_R = 13, SIZE_R = 34
 };
 
+#define SELECTED_STYLE COLOR_PAIR(SELECTED_FILE) | A_BOLD
+
 enum Colors {
-    SELECTED = 5,
+    SELECTED_FILE = 5, CASUAL_FILE = 6,
+    SELECTED_DIR = 7, CASUAL_DIR = 8,
+    SELECTED_OTHER = 9, CASUAL_OTHER = 10
 };
 
 enum {
@@ -30,7 +32,12 @@ int end = -1;
 int cur_size = -1;
 
 static void init_colors() {
-    init_pair(SELECTED, COLOR_WHITE, COLOR_BLUE);
+    init_pair(SELECTED_FILE, COLOR_WHITE, COLOR_BLUE);
+    init_pair(CASUAL_FILE, COLOR_WHITE, -1);
+    init_pair(SELECTED_DIR, COLOR_MAGENTA, COLOR_BLUE);
+    init_pair(CASUAL_DIR, COLOR_MAGENTA, -1);
+    init_pair(SELECTED_OTHER, COLOR_RED, COLOR_BLUE);
+    init_pair(CASUAL_OTHER, COLOR_RED, COLOR_BLUE);
 }
 
 static void init_specifier(int width) {
@@ -83,49 +90,62 @@ static void set_begin_and_end(int cur, int lines, int size) {
     }
 }
 
-static void show_entities_name(WINDOW *ptr, int cur, const Entity *entities) {
-        for (int i = begin; i < end; ++i) {
-        if (i == cur) {
-            mvwprintw(ptr, 1 + i - begin, 1, ARROW);
-            wattron(ptr, SELECTED_STYLE);
-            mvwprintw(ptr, 1 + i - begin, NAME_L, "%s", entities[i].name);
-            wattroff(ptr, SELECTED_STYLE);
-        } else {
-            mvwprintw(ptr, 1 + i - begin, 1, NO_ARROW);
-            mvwprintw(ptr, 1 + i - begin, NAME_L, specifier, entities[i].name);
+static int get_style(unsigned type, int selected) {
+    if (selected) {
+        switch (type) {
+            case DT_REG: {
+                return COLOR_PAIR(SELECTED_FILE) | A_BOLD;
+            }
+            case DT_DIR: {
+                return COLOR_PAIR(SELECTED_DIR) | A_BOLD;
+            }
+            default: {
+                return COLOR_PAIR(SELECTED_OTHER) | A_BOLD;
+            }
         }
+    }
+    switch (type) {
+        case DT_REG: {
+            return COLOR_PAIR(CASUAL_FILE);
+        }
+        case DT_DIR: {
+            return COLOR_PAIR(CASUAL_DIR);
+        }
+        default: {
+            return COLOR_PAIR(CASUAL_OTHER);
+        }
+    }
+}
+
+static void show_entities_name(WINDOW *ptr, int cur, const Entity *entities) {
+    for (int i = begin; i < end; ++i) {
+        int style = get_style(entities[i].type, i == cur);
+        mvwprintw(ptr, 1 + i - begin, 1, i == cur ? ARROW : NO_ARROW);
+        wattron(ptr, style);
+        mvwprintw(ptr, 1 + i - begin, NAME_L, specifier, entities[i].name);
+        wattroff(ptr, style);
     }
 }
 
 static void show_entities_size(WINDOW *ptr, int cur, int width, const Entity *entities) {
     for (int i = begin; i < end; ++i) {
-        if (i == cur) {
-            wattron(ptr, SELECTED_STYLE);
-            if (entities[i].type == DT_DIR) {
-                mvwprintw(ptr, 1 + i - begin, width - SIZE_R, "DIR");
-            } else {
-                mvwprintw(ptr, 1 + i - begin, width - SIZE_R, "%zu", entities[i].size);
-            }
-            wattroff(ptr, SELECTED_STYLE);
+        int style = get_style(entities[i].type, i == cur);
+        wattron(ptr, style);
+        if (entities[i].type == DT_DIR) {
+            mvwprintw(ptr, 1 + i - begin, width - SIZE_R, "DIR");
         } else {
-            if (entities[i].type == DT_DIR) {
-                mvwprintw(ptr, 1 + i - begin, width - SIZE_R, "DIR");
-            } else {
-                mvwprintw(ptr, 1 + i - begin, width - SIZE_R, "%zu", entities[i].size);
-            }
+            mvwprintw(ptr, 1 + i - begin, width - SIZE_R, "%zu", entities[i].size);
         }
+        wattroff(ptr, style);
     }
 }
 
 static void show_entities_date(WINDOW *ptr, int cur, int width, const Entity *entities) {
     for (int i = begin; i < end; ++i) {
-        if (i == cur) {
-            wattron(ptr, SELECTED_STYLE);
-            mvwprintw(ptr, 1 + i - begin, width - MODIFIED_R, "%s", entities[i].date);
-            wattroff(ptr, SELECTED_STYLE);
-        } else {
-            mvwprintw(ptr, 1 + i - begin, width - MODIFIED_R, "%s", entities[i].date);
-        }
+        int style = get_style(entities[i].type, i == cur);
+        wattron(ptr, style);
+        mvwprintw(ptr, 1 + i - begin, width - MODIFIED_R, "%s", entities[i].date);
+        wattroff(ptr, style);
     }
 }
 
