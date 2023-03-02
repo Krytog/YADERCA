@@ -2,7 +2,7 @@
 
 #include <ncurses.h>
 
-#define VERSION "YADERCA v0.5"
+#define VERSION "YADERCA v0.6"
 
 enum {
     HEIGHT = 3, LEFT_OFFSET = 10, RIGHT_OFFSET = 15
