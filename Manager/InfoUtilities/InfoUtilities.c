@@ -5,16 +5,30 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 #include <time.h>
-
-#include <fcntl.h>
 
 static void on_error(const char *message, int *active) {
     perror(message);
     *active = -1;
     return;
+}
+
+enum DateOffsets {
+    MONTH_SIZE = 3, MONTH_OFFSET = 4, DAY_SIZE = 2, DAY_OFFSET = 8, TIME_SIZE = 5, TIME_OFFSET = 11, YEAR_SIZE = 4, YEAR_OFFSET = 20
+};
+
+static void formate_and_write_date(char *dest, __time_t mod_time) {
+    time_t seconds = time(NULL);
+    char *src = ctime(&mod_time);
+    struct tm *current_time = localtime(&seconds);
+    struct tm *mod = localtime(&mod_time);
+    snprintf(dest, MONTH_SIZE + 2, "%s ", src + MONTH_OFFSET);
+    snprintf(dest + MONTH_SIZE + 1, DAY_SIZE + 2, "%s ", src + DAY_OFFSET);
+    if (current_time->tm_year == mod->tm_year) {
+        snprintf(dest + MONTH_SIZE + DAY_SIZE + 2, TIME_SIZE + 1, "%s ", src + TIME_OFFSET);
+    } else {
+        snprintf(dest + MONTH_SIZE + DAY_SIZE + 2, YEAR_SIZE + 1, "%s", src + YEAR_OFFSET);
+    }
 }
 
 void get_info(PathHolder *path, Entity *entity, struct dirent *info, int *active) {
@@ -35,12 +49,5 @@ void get_info(PathHolder *path, Entity *entity, struct dirent *info, int *active
     if (!entity->date) {
         on_error("get_info: calloc for date failed", active);
     }
-    snprintf(entity->date, DATE_SIZE + 1, "%ld", file_info.st_mtim.tv_sec);
-
-    int fd = open("log.txt", O_CREAT | O_APPEND | O_WRONLY, S_IRWXU);
-
-    time(NULL);
-    dprintf(fd, "%s\n", ctime(&file_info.st_mtim.tv_sec));
-
-    close(fd);
+    formate_and_write_date(entity->date, file_info.st_mtim.tv_sec);
 }

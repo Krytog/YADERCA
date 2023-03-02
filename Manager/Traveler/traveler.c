@@ -5,10 +5,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-
 
 static void on_error(const char *message, int *active) {
     perror(message);
@@ -25,10 +21,6 @@ static void update_current_path(PathHolder *path, char *name, int *active) {
     path->end_pos += name_size;
     snprintf(path->current_path + path->end_pos, 2, "/");
     ++path->end_pos;
-}
-
-static void formate_and_write_date(char *dest, char *src) {
-    snprintf(dest, 3, "%s", src + 4);
 }
 
 static void clean_up(struct dirent **ent, int size) {
