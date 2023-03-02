@@ -2,7 +2,7 @@
 
 #include <ncurses.h>
 
-#define VERSION "YADERCA v0.6"
+#define VERSION "YADERCA v0.7"
 
 enum {
     HEIGHT = 3, LEFT_OFFSET = 10, RIGHT_OFFSET = 15
@@ -27,7 +27,7 @@ void init_UI_bufferl(WINDOW **ptr, int terminal_width, int terminal_height) {
     wattroff(*ptr, COLOR_PAIR(DEFAULT_COLOR));
 }
 
-void update_UI_bufferl(WINDOW *ptr, int *future) {
+void update_UI_bufferl(WINDOW *ptr, const InfoHolder *info_holder) {
     wattron(ptr, COLOR_PAIR(EMPTY_BUFFER));
     mvwprintw(ptr, 1, LEFT_OFFSET, "NONE");
     wattron(ptr, COLOR_PAIR(EMPTY_BUFFER));

@@ -68,10 +68,10 @@ void go_into_dir(PathHolder *path, char *name, InfoHolder *info_holder, int *act
         return;
     }
     info_holder_clean_up(info_holder);
-    info_holder->entities = calloc(size, sizeof(*info_holder->entities));
-    for (int i = 0; i < size; ++i) {
-        get_info(path, info_holder->entities + i, ent[i], active);
+    info_holder->entities = calloc(size - 1, sizeof(*info_holder->entities));
+    for (int i = 1; i < size; ++i) {
+        get_info(path, info_holder->entities + i - 1, ent[i], active);
     }
-    info_holder->entities_num = size;
+    info_holder->entities_num = size - 1;
     clean_up(ent, size);
 }
