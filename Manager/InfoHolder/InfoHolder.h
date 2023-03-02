@@ -3,11 +3,15 @@
 
 #include <stdlib.h>
 
+enum {
+    DATE_SIZE = 13
+};
+
 typedef struct Entity {
-    int type;
-    const char *name;
+    unsigned char type;
+    char *name;
     size_t size;
-    const char *date;
+    char *date;
 } Entity;
 
 typedef struct InfoHolder {
@@ -15,5 +19,9 @@ typedef struct InfoHolder {
     size_t entities_num;
     Entity *entities;
 } InfoHolder;
+
+void info_holder_clean_up(InfoHolder *info_holder);
+
+void info_holder_init(InfoHolder *info_holder);
 
 #endif

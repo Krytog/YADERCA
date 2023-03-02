@@ -9,6 +9,6 @@ add_link_options(-fsanitize=address)
 
 add_executable(YADERCA main.c
         UI/UI.c UI/BufferLine/UI_bufferl.c UI/LegendLine/UI_Legendl.c UI/Body/UI_body.c
-        Manager/InputHandler/InputHandler.c)
+        Manager/InputHandler/InputHandler.c Manager/Traveler/traveler.c Manager/InfoHolder/InfoHolder.c)
 
 target_link_libraries(YADERCA ${CURSES_LIBRARIES})

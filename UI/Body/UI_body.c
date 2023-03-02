@@ -2,6 +2,7 @@
 
 #include <ncurses.h>
 #include <stdlib.h>
+#include <dirent.h>
 
 #define ARROW "->"
 #define NO_ARROW "  "
@@ -65,7 +66,7 @@ static void show_entities_name(WINDOW *ptr, int cur, int lines, const Entity *en
         if (i == cur) {
             mvwprintw(ptr, 1 + i, 1, ARROW);
             wattron(ptr, SELECTED_STYLE);
-            mvwprintw(ptr, 1 + i, NAME_L, specifier, entities[i].name);
+            mvwprintw(ptr, 1 + i, NAME_L, "%s", entities[i].name);
             wattroff(ptr, SELECTED_STYLE);
         } else {
             mvwprintw(ptr, 1 + i, 1, NO_ARROW);
@@ -79,10 +80,18 @@ static void show_entities_size(WINDOW *ptr, int cur, int lines, int width, const
     for (int i = beg_line; i < size; ++i) {
         if (i == cur) {
             wattron(ptr, SELECTED_STYLE);
-            mvwprintw(ptr, 1 + i, width - SIZE_R, "%zu", entities[i].size);
+            if (entities[i].type == DT_DIR) {
+                mvwprintw(ptr, 1 + i, width - SIZE_R, "DIR");
+            } else {
+                mvwprintw(ptr, 1 + i, width - SIZE_R, "%zu", entities[i].size);
+            }
             wattroff(ptr, SELECTED_STYLE);
         } else {
-            mvwprintw(ptr, 1 + i, width - SIZE_R, "%zu", entities[i].size);
+            if (entities[i].type == DT_DIR) {
+                mvwprintw(ptr, 1 + i, width - SIZE_R, "DIR");
+            } else {
+                mvwprintw(ptr, 1 + i, width - SIZE_R, "%zu", entities[i].size);
+            }
         }
     }
 }

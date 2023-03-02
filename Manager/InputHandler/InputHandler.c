@@ -1,4 +1,5 @@
 #include "InputHandler.h"
+#include "../Traveler/traveler.h"
 
 #include <ncurses.h>
 

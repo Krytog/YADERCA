@@ -2,7 +2,7 @@
 #define UI_body_H_INCLUDED
 
 #include <ncurses.h>
-#include "../../Manager/InfoHolder.h"
+#include "../../Manager/InfoHolder/InfoHolder.h"
 
 void init_UI_body(WINDOW **ptr, int terminal_width, int terminal_height);
 void update_UI_body(WINDOW *ptr, int terminal_width, int terminal_height, const InfoHolder *info);
