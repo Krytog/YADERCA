@@ -5,6 +5,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+
+#define BACK ".."
 
 static void on_error(const char *message, int *active) {
     perror(message);
@@ -12,7 +15,21 @@ static void on_error(const char *message, int *active) {
     return;
 }
 
+static void delete_last_entry_from_path(PathHolder *path) {
+    if (path->end_pos > 1) {
+        path->end_pos -= 2;
+    }
+    while (path->end_pos > 0 && path->current_path[path->end_pos] != '/') {
+        --path->end_pos;
+    }
+    path->current_path[++path->end_pos] = '\0';
+}
+
 static void update_current_path(PathHolder *path, char *name, int *active) {
+    if (!strcmp(name, BACK)) {
+        delete_last_entry_from_path(path);
+        return;
+    }
     size_t name_size = strlen(name);
     if (path->end_pos + name_size >= PATH_MAX) {
         on_error("update_current_path: exceed path max", active);
@@ -30,14 +47,23 @@ static void clean_up(struct dirent **ent, int size) {
     free(ent);
 }
 
+static void init_start_path(PathHolder *path) {
+    getcwd(path->current_path, PATH_MAX);
+    path->end_pos += strlen(path->current_path);
+    path->current_path[path->end_pos] = '/';
+    ++path->end_pos;
+}
+
 void go_into_dir(PathHolder *path, char *name, InfoHolder *info_holder, int *active) {
-    update_current_path(path, name, active);
+    if (name == NULL) {
+        init_start_path(path);
+    } else {
+        update_current_path(path, name, active);
+    }
     struct dirent **ent;
     int size = scandir(path->current_path, &ent, NULL, alphasort);
-    if (size < 0) {
-        perror("scandir failed, path is\n");
-        perror(path->current_path);
-        *active = -1;
+    if (size <= 0) {
+        delete_last_entry_from_path(path);
         return;
     }
     info_holder_clean_up(info_holder);

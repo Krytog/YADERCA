@@ -1,5 +1,6 @@
 #include <ncurses.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "UI/UI.h"
 #include "Manager/InputHandler/InputHandler.h"
@@ -18,7 +19,7 @@ int main() {
     int active = 1;
     keypad(stdscr, TRUE);
 
-    go_into_dir(&path_holder, ".", &info_holder, &active);
+    go_into_dir(&path_holder, NULL, &info_holder, &active);
 
     while (active == 1) {
         draw_UI(&info_holder);
