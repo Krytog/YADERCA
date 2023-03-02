@@ -1,4 +1,5 @@
 #include "traveler.h"
+#include "../InfoUtilities/InfoUtilities.h"
 
 #include <dirent.h>
 #include <stdio.h>
@@ -8,9 +9,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-void path_holder_init(PathHolder *path_holder) {
-    path_holder->end_pos = 0;
-}
 
 static void on_error(const char *message, int *active) {
     perror(message);
@@ -29,25 +27,8 @@ static void update_current_path(PathHolder *path, char *name, int *active) {
     ++path->end_pos;
 }
 
-static void get_info(PathHolder *path, Entity *entity, struct dirent *info, int *active) {
-    struct stat file_info;
-    char buffer[PATH_MAX];
-    snprintf(buffer, path->end_pos + 1, "%s", path->current_path);
-    snprintf(buffer + path->end_pos, strlen(info->d_name) + 1, "%s", info->d_name);
-    lstat(buffer, &file_info);
-    int name_size = strlen(info->d_name);
-    entity->type = info->d_type;
-    entity->name = calloc(name_size + 1, sizeof(*entity->name));
-    if (!entity->name) {
-        on_error("get_info: calloc for name failed", active);
-    }
-    snprintf(entity->name, name_size + 1, "%s", info->d_name);
-    entity->size = file_info.st_size;
-    entity->date = calloc(DATE_SIZE + 1, sizeof(*entity->date));
-    if (!entity->date) {
-        on_error("get_info: calloc for date failed", active);
-    }
-    snprintf(entity->date, DATE_SIZE + 1, "%ld", file_info.st_mtim.tv_sec);
+static void formate_and_write_date(char *dest, char *src) {
+    snprintf(dest, 3, "%s", src + 4);
 }
 
 static void clean_up(struct dirent **ent, int size) {
