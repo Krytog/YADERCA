@@ -62,7 +62,6 @@ static void update_info(PathHolder *path, InfoHolder *info_holder, int *active) 
         return;
     }
     info_holder_clean_up(info_holder);
-    info_holder->selected_line = 0;
     info_holder->entities = calloc(size - 1, sizeof(*info_holder->entities));
     for (int i = 1; i < size; ++i) {
         get_info(path, info_holder->entities + i - 1, ent[i], active);
@@ -78,4 +77,20 @@ void go_into_dir(PathHolder *path, char *name, InfoHolder *info_holder, int *act
         update_current_path(path, name, active);
     }
     update_info(path, info_holder, active);
+    info_holder->selected_line = 0;
+}
+
+void delete_file(PathHolder *path, char *name, InfoHolder *info_holder, int *active) {
+    if (!strcmp(name, BACK)) {
+        return;
+    }
+    update_current_path(path, name, active);
+    path->current_path[--path->end_pos] = '\0';
+    remove(path->current_path);
+    path->current_path[path->end_pos++] = '/';
+    delete_last_entry_from_path(path);
+    update_info(path, info_holder, active);
+    if (info_holder->selected_line == info_holder->entities_num) {
+        --info_holder->selected_line;
+    }
 }

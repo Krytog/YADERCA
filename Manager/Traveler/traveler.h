@@ -8,4 +8,6 @@
 
 void go_into_dir(PathHolder *current_path, char *name, InfoHolder *info_holder, int *active);
 
+void delete_file(PathHolder *current_path, char *name, InfoHolder *infoHolder, int *active);
+
 #endif

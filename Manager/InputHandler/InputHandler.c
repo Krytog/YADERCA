@@ -3,7 +3,7 @@
 #include <ncurses.h>
 
 enum {
-    COMMAND_INTO = '\n'
+    COMMAND_INTO = '\n', COMMAND_DELETE1 = 'D', COMMAND_DELETE2 = 'd'
 };
 
 void wait_for_and_handle_input(PathHolder *path_holder, InfoHolder *info, int *active) {
@@ -26,6 +26,14 @@ void wait_for_and_handle_input(PathHolder *path_holder, InfoHolder *info, int *a
             if (info->selected_line > 0) {
                 --info->selected_line;
             }
+            break;
+        }
+        case COMMAND_DELETE1: {
+            delete_file(path_holder, info->entities[info->selected_line].name, info, active);
+            break;
+        }
+        case COMMAND_DELETE2: {
+            delete_file(path_holder, info->entities[info->selected_line].name, info, active);
             break;
         }
         case COMMAND_INTO: {
