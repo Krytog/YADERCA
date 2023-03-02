@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <dirent.h>
 
+#include <fcntl.h>
+#include <unistd.h>
+
 #define ARROW "->"
 #define NO_ARROW "  "
 
@@ -24,6 +27,10 @@ enum {
 static char specifier[SPECIFIER_NUM_SIZE];
 
 static char *selected_background;
+
+int begin = -1;
+int end = -1;
+int cur_size = -1;
 
 static void init_colors() {
     init_pair(SELECTED, COLOR_WHITE, COLOR_BLUE);
@@ -60,92 +67,103 @@ void init_UI_body(WINDOW **ptr, int terminal_width, int terminal_height) {
     init_UI_corners(*ptr, terminal_width, height);
 }
 
-static void get_begin_and_end(int *beg, int *end, int cur, int lines, int size) {
-    *beg = cur - lines + 1 > 0 ? cur - lines + 1 : 0;
-    *end = *beg + (lines < size ? lines : size);
+static void set_begin_and_end(int cur, int lines, int size) {
+    if (cur_size != size) {
+        begin = 0;
+        end = lines < size ? lines : size;
+        cur_size = size;
+        return;
+    }
+    if (cur < begin) {
+        --begin;
+        --end;
+        return;
+    }
+    if (cur == end) {
+        ++begin;
+        ++end;
+        return;
+    }
 }
 
 static void show_entities_name(WINDOW *ptr, int cur, int lines, const Entity *entities, size_t size) {
-    int beg_line, end;
-    get_begin_and_end(&beg_line, &end, cur, lines, size);
-        for (int i = beg_line; i < end; ++i) {
+        for (int i = begin; i < end; ++i) {
         if (i == cur) {
-            mvwprintw(ptr, 1 + i - beg_line, 1, ARROW);
+            mvwprintw(ptr, 1 + i - begin, 1, ARROW);
             wattron(ptr, SELECTED_STYLE);
-            mvwprintw(ptr, 1 + i - beg_line, NAME_L, "%s", entities[i].name);
+            mvwprintw(ptr, 1 + i - begin, NAME_L, "%s", entities[i].name);
             wattroff(ptr, SELECTED_STYLE);
         } else {
-            mvwprintw(ptr, 1 + i - beg_line, 1, NO_ARROW);
-            mvwprintw(ptr, 1 + i - beg_line, NAME_L, specifier, entities[i].name);
+            mvwprintw(ptr, 1 + i - begin, 1, NO_ARROW);
+            mvwprintw(ptr, 1 + i - begin, NAME_L, specifier, entities[i].name);
         }
     }
 }
 
 static void show_entities_size(WINDOW *ptr, int cur, int lines, int width, const Entity *entities, size_t size) {
-    int beg_line, end;
-    get_begin_and_end(&beg_line, &end, cur, lines, size);
-    for (int i = beg_line; i < end; ++i) {
+    for (int i = begin; i < end; ++i) {
         if (i == cur) {
             wattron(ptr, SELECTED_STYLE);
             if (entities[i].type == DT_DIR) {
-                mvwprintw(ptr, 1 + i - beg_line, width - SIZE_R, "DIR");
+                mvwprintw(ptr, 1 + i - begin, width - SIZE_R, "DIR");
             } else {
-                mvwprintw(ptr, 1 + i - beg_line, width - SIZE_R, "%zu", entities[i].size);
+                mvwprintw(ptr, 1 + i - begin, width - SIZE_R, "%zu", entities[i].size);
             }
             wattroff(ptr, SELECTED_STYLE);
         } else {
             if (entities[i].type == DT_DIR) {
-                mvwprintw(ptr, 1 + i - beg_line, width - SIZE_R, "DIR");
+                mvwprintw(ptr, 1 + i - begin, width - SIZE_R, "DIR");
             } else {
-                mvwprintw(ptr, 1 + i - beg_line, width - SIZE_R, "%zu", entities[i].size);
+                mvwprintw(ptr, 1 + i - begin, width - SIZE_R, "%zu", entities[i].size);
             }
         }
     }
 }
 
 static void show_entities_date(WINDOW *ptr, int cur, int lines, int width, const Entity *entities, size_t size) {
-    int beg_line, end;
-    get_begin_and_end(&beg_line, &end, cur, lines, size);
-    for (int i = beg_line; i < end; ++i) {
+    for (int i = begin; i < end; ++i) {
         if (i == cur) {
             wattron(ptr, SELECTED_STYLE);
-            mvwprintw(ptr, 1 + i - beg_line, width - MODIFIED_R, "%s", entities[i].date);
+            mvwprintw(ptr, 1 + i - begin, width - MODIFIED_R, "%s", entities[i].date);
             wattroff(ptr, SELECTED_STYLE);
         } else {
-            mvwprintw(ptr, 1 + i - beg_line, width - MODIFIED_R, "%s", entities[i].date);
+            mvwprintw(ptr, 1 + i - begin, width - MODIFIED_R, "%s", entities[i].date);
         }
     }
 }
 
-static void highlight_line(WINDOW *ptr, int cur, int height) {
+static void highlight_line(WINDOW *ptr, int cur) {
     wattron(ptr, SELECTED_STYLE);
-    mvwprintw(ptr, 1 + (cur < height - 1 ? cur : height - 1), NAME_L, "%s", selected_background);
+    mvwprintw(ptr, 1 + cur - begin, NAME_L, "%s", selected_background);
     wattroff(ptr, SELECTED_STYLE);
 }
 
-static void clear_line(WINDOW *ptr, int cur, int height) {
+static void clear_line(WINDOW *ptr, int cur) {
     if (cur == -1) {
         return;
     }
-    mvwprintw(ptr, 1 + (cur < height - 1 ? cur : height - 1), NAME_L, "%s", selected_background);
-    mvwprintw(ptr, 1 + (cur < height - 1 ? cur : height - 1), 1, "%s", NO_ARROW);
+    mvwprintw(ptr, 1 + cur, NAME_L, "%s", selected_background);
+    mvwprintw(ptr, 1 + cur, 1, "%s", NO_ARROW);
 }
 
-static void clear_before_update(WINDOW *ptr, int cur, int height, int prev) {
-    for (int i = 0; i <= height; ++i) {
-        clear_line(ptr, i, height);
+static void clear_before_update(WINDOW *ptr, int height) {
+    for (int i = 0; i < height; ++i) {
+        clear_line(ptr, i);
     }
 }
 
 void update_UI_body(WINDOW *ptr, int terminal_width, int terminal_height, const InfoHolder *info) {
-    static int prev_highlight = -1;
     int height = terminal_height - 2 * HEIGHT;
-    clear_before_update(ptr, info->selected_line, height, prev_highlight);
-    highlight_line(ptr, info->selected_line, height);
+    set_begin_and_end(info->selected_line, height, info->entities_num);
+    clear_before_update(ptr, height);
+    highlight_line(ptr, info->selected_line);
     show_entities_name(ptr, info->selected_line, height, info->entities, info->entities_num);
     show_entities_size(ptr, info->selected_line, height, terminal_width, info->entities, info->entities_num);
     show_entities_date(ptr, info->selected_line, height, terminal_width, info->entities, info->entities_num);
-    prev_highlight = info->selected_line;
+
+    int fd = open("log.txt", O_CREAT | O_APPEND | O_WRONLY, S_IRWXU);
+    dprintf(fd, "BEGIN: %d END: %d, CUR: %d\n", begin, end, info->selected_line);
+    close(fd);
 }
 void destroy_UI_body(WINDOW *ptr) {
     delwin(ptr);

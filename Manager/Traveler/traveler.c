@@ -54,12 +54,7 @@ static void init_start_path(PathHolder *path) {
     ++path->end_pos;
 }
 
-void go_into_dir(PathHolder *path, char *name, InfoHolder *info_holder, int *active) {
-    if (name == NULL) {
-        init_start_path(path);
-    } else {
-        update_current_path(path, name, active);
-    }
+static void update_info(PathHolder *path, InfoHolder *info_holder, int *active) {
     struct dirent **ent;
     int size = scandir(path->current_path, &ent, NULL, alphasort);
     if (size <= 0) {
@@ -74,4 +69,13 @@ void go_into_dir(PathHolder *path, char *name, InfoHolder *info_holder, int *act
     }
     info_holder->entities_num = size - 1;
     clean_up(ent, size);
+}
+
+void go_into_dir(PathHolder *path, char *name, InfoHolder *info_holder, int *active) {
+    if (name == NULL) {
+        init_start_path(path);
+    } else {
+        update_current_path(path, name, active);
+    }
+    update_info(path, info_holder, active);
 }
