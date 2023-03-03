@@ -117,34 +117,66 @@ static int get_style(unsigned type, int selected) {
     }
 }
 
-static void show_entities_name(WINDOW *ptr, int cur, const Entity *entities) {
+static void show_entities_name(WINDOW *ptr, int cur, const Entity *entities, const size_t *indices, int show_hidden) {
+    if (show_hidden) {
+        for (int i = begin; i < end; ++i) {
+            int style = get_style(entities[i].type, i == cur);
+            mvwprintw(ptr, 1 + i - begin, 1, i == cur ? ARROW : NO_ARROW);
+            wattron(ptr, style);
+            mvwprintw(ptr, 1 + i - begin, NAME_L, specifier, entities[i].name);
+            wattroff(ptr, style);
+        }
+        return;
+    }
     for (int i = begin; i < end; ++i) {
-        int style = get_style(entities[i].type, i == cur);
+        int style = get_style(entities[indices[i]].type, i == cur);
         mvwprintw(ptr, 1 + i - begin, 1, i == cur ? ARROW : NO_ARROW);
         wattron(ptr, style);
-        mvwprintw(ptr, 1 + i - begin, NAME_L, specifier, entities[i].name);
+        mvwprintw(ptr, 1 + i - begin, NAME_L, specifier, entities[indices[i]].name);
         wattroff(ptr, style);
     }
 }
 
-static void show_entities_size(WINDOW *ptr, int cur, int width, const Entity *entities) {
+static void show_entities_size(WINDOW *ptr, int cur, int width, const Entity *entities, const size_t *indices, int show_hidden) {
+    if (show_hidden) {
+        for (int i = begin; i < end; ++i) {
+            int style = get_style(entities[i].type, i == cur);
+            wattron(ptr, style);
+            if (entities[i].type == DT_DIR) {
+                mvwprintw(ptr, 1 + i - begin, width - SIZE_R, "DIR");
+            } else {
+                mvwprintw(ptr, 1 + i - begin, width - SIZE_R, "%zu", entities[i].size);
+            }
+            wattroff(ptr, style);
+        }
+        return;
+    }
     for (int i = begin; i < end; ++i) {
-        int style = get_style(entities[i].type, i == cur);
+        int style = get_style(entities[indices[i]].type, i == cur);
         wattron(ptr, style);
         if (entities[i].type == DT_DIR) {
             mvwprintw(ptr, 1 + i - begin, width - SIZE_R, "DIR");
         } else {
-            mvwprintw(ptr, 1 + i - begin, width - SIZE_R, "%zu", entities[i].size);
+            mvwprintw(ptr, 1 + i - begin, width - SIZE_R, "%zu", entities[indices[i]].size);
         }
         wattroff(ptr, style);
     }
 }
 
-static void show_entities_date(WINDOW *ptr, int cur, int width, const Entity *entities) {
+static void show_entities_date(WINDOW *ptr, int cur, int width, const Entity *entities, const size_t *indices, int show_hidden) {
+    if (show_hidden) {
+        for (int i = begin; i < end; ++i) {
+            int style = get_style(entities[i].type, i == cur);
+            wattron(ptr, style);
+            mvwprintw(ptr, 1 + i - begin, width - MODIFIED_R, "%s", entities[i].date);
+            wattroff(ptr, style);
+        }
+        return;
+    }
     for (int i = begin; i < end; ++i) {
-        int style = get_style(entities[i].type, i == cur);
+        int style = get_style(entities[indices[i]].type, i == cur);
         wattron(ptr, style);
-        mvwprintw(ptr, 1 + i - begin, width - MODIFIED_R, "%s", entities[i].date);
+        mvwprintw(ptr, 1 + i - begin, width - MODIFIED_R, "%s", entities[indices[i]].date);
         wattroff(ptr, style);
     }
 }
@@ -169,14 +201,26 @@ static void clear_before_update(WINDOW *ptr, int height) {
     }
 }
 
+#include <fcntl.h>
+#include <unistd.h>
+
 void update_UI_body(WINDOW *ptr, int terminal_width, int terminal_height, const InfoHolder *info) {
     int height = terminal_height - 2 * HEIGHT;
-    set_begin_and_end(info->selected_line, height, info->entities_num);
+
+    int fd = open("log.txt", O_CREAT | O_APPEND | O_WRONLY, S_IRWXU);
+    dprintf(fd, "paedfjo: %zu\n", info->not_hidden_info.num);
+    close(fd);
+
+    if (info->show_hidden) {
+        set_begin_and_end(info->selected_line, height, info->entities_num);
+    } else {
+        set_begin_and_end(info->selected_line, height, info->not_hidden_info.num);
+    }
     clear_before_update(ptr, height);
     highlight_line(ptr, info->selected_line);
-    show_entities_name(ptr, info->selected_line, info->entities);
-    show_entities_size(ptr, info->selected_line, terminal_width, info->entities);
-    show_entities_date(ptr, info->selected_line, terminal_width, info->entities);
+    show_entities_name(ptr, info->selected_line, info->entities, info->not_hidden_info.indices, info->show_hidden);
+    show_entities_size(ptr, info->selected_line, terminal_width, info->entities, info->not_hidden_info.indices, info->show_hidden);
+    show_entities_date(ptr, info->selected_line, terminal_width, info->entities, info->not_hidden_info.indices, info->show_hidden);
 }
 
 void destroy_UI_body(WINDOW *ptr) {

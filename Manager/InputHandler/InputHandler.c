@@ -2,42 +2,47 @@
 #include "../Traveler/traveler.h"
 #include <ncurses.h>
 
-enum {
-    COMMAND_INTO = '\n', COMMAND_DELETE1 = 'D', COMMAND_DELETE2 = 'd'
+enum Commands {
+    COMMAND_EXIT = 'q', COMMAND_INTO = '\n', COMMAND_DELETE1 = 'D', COMMAND_DELETE2 = 'd',
+    COMMAND_SWITCH_HIDDEN_SHOW1 = 'h', COMMAND_SWITCH_HIDDEN_SHOW2 = 'H'
 };
 
 void wait_for_and_handle_input(PathHolder *path_holder, InfoHolder *info, int *active) {
     int input = getch();
     switch (input) {
-        case 'q': {
+        case COMMAND_EXIT: {
             input = getch();
-            if (input == 'q') {
+            if (input == COMMAND_EXIT) {
                 *active = 0;
             }
             break;
         }
         case KEY_DOWN: {
-            if (info->selected_line + 1 < info->entities_num) {
-                ++info->selected_line;
-            }
+            increase_selected_line(info);
             break;
         }
         case KEY_UP: {
-            if (info->selected_line > 0) {
-                --info->selected_line;
-            }
+            decrease_selected_line(info);
             break;
         }
         case COMMAND_DELETE1: {
-            delete_file(path_holder, info->entities[info->selected_line].name, info, active);
+            delete_file(path_holder, get_selected_name(info), info, active);
             break;
         }
         case COMMAND_DELETE2: {
-            delete_file(path_holder, info->entities[info->selected_line].name, info, active);
+            delete_file(path_holder, get_selected_name(info), info, active);
+            break;
+        }
+        case COMMAND_SWITCH_HIDDEN_SHOW1: {
+            switch_show_hidden(info);
+            break;
+        }
+        case COMMAND_SWITCH_HIDDEN_SHOW2: {
+            switch_show_hidden(info);
             break;
         }
         case COMMAND_INTO: {
-            go_into_dir(path_holder, info->entities[info->selected_line].name, info, active);
+            go_into_dir(path_holder, get_selected_name(info), info, active);
             break;
         }
     }

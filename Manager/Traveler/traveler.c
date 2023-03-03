@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #define BACK ".."
+#define HIDDEN_SIGN '.'
 
 static void on_error(const char *message, int *active) {
     perror(message);
@@ -63,9 +64,15 @@ static void update_info(PathHolder *path, InfoHolder *info_holder, int *active) 
     }
     info_holder_clean_up(info_holder);
     info_holder->entities = calloc(size - 1, sizeof(*info_holder->entities));
+    info_holder->not_hidden_info.indices = calloc(size - 1, sizeof(*info_holder->not_hidden_info.indices));
+    size_t not_hidden_num = 0;
     for (int i = 1; i < size; ++i) {
         get_info(path, info_holder->entities + i - 1, ent[i], active);
+        if (ent[i]->d_name[0] != HIDDEN_SIGN || !strcmp(ent[i]->d_name, BACK)) {
+            info_holder->not_hidden_info.indices[not_hidden_num++] = i - 1;
+        }
     }
+    info_holder->not_hidden_info.num = not_hidden_num;
     info_holder->entities_num = size - 1;
     clean_up(ent, size);
 }
@@ -90,7 +97,16 @@ void delete_file(PathHolder *path, char *name, InfoHolder *info_holder, int *act
     path->current_path[path->end_pos++] = '/';
     delete_last_entry_from_path(path);
     update_info(path, info_holder, active);
-    if (info_holder->selected_line == info_holder->entities_num) {
+    if (info_holder->selected_line == get_upper_limit(info_holder)) {
         --info_holder->selected_line;
     }
+}
+
+void switch_show_hidden(InfoHolder *info_holder) {
+    if (info_holder->show_hidden) {
+        info_holder->show_hidden = 0;
+    } else {
+        info_holder->show_hidden = 1;
+    }
+    info_holder->selected_line = 0;
 }
