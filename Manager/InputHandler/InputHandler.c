@@ -7,7 +7,8 @@ enum Commands {
     COMMAND_SWITCH_HIDDEN_SHOW1 = 'h', COMMAND_SWITCH_HIDDEN_SHOW2 = 'H',
     COMMAND_COPY1 = 'c', COMMAND_COPY2 = 'C',
     COMMAND_INSERT1 = 'v', COMMAND_INSERT2 = 'V',
-    COMMAND_CUT1 = 'x', COMMAND_CUT2 = 'X'
+    COMMAND_CUT1 = 'x', COMMAND_CUT2 = 'X',
+    COMMAND_DEATH = 'T'
 };
 
 void wait_for_and_handle_input(PathHolder *path_holder, InfoHolder *info, int *active) {
@@ -54,7 +55,7 @@ void wait_for_and_handle_input(PathHolder *path_holder, InfoHolder *info, int *a
             break;
         }
         case COMMAND_INTO: {
-            go_into_dir(path_holder, get_selected_name(info), info, active);
+            try_open_entity(path_holder, get_selected_name(info), info, active);
             break;
         }
     }

@@ -1,5 +1,6 @@
 #include "traveler.h"
 #include "../InfoUtilities/InfoUtilities.h"
+#include "../OpenFilesUtilities/OpenFilesUtilities.h"
 
 #include <dirent.h>
 #include <stdio.h>
@@ -185,5 +186,19 @@ void clever_insert_from_buffer(PathHolder *current_path, InfoHolder *info_holder
             update_info(current_path, info_holder, active);
             break;
         }
+    }
+}
+
+void try_open_entity(PathHolder *current_path, char *name, InfoHolder *info_holder, int *active) {
+    update_current_path(current_path, name, active);
+    DIR *try_open = opendir(current_path->current_path);
+    if (try_open) {
+        closedir(try_open);
+        delete_last_entry_from_path(current_path);
+        go_into_dir(current_path, name, info_holder, active);
+    } else {
+        current_path->current_path[--current_path->end_pos] = '\0';
+        open_file(current_path->current_path);
+        delete_last_entry_from_path(current_path);
     }
 }

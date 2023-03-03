@@ -1,0 +1,7 @@
+. open_text ../OpenFiles/Libraries/basic_files.so
+.txt open_text ../OpenFiles/Libraries/basic_files.so
+.c open_text ../OpenFiles/Libraries/basic_files.so
+.h open_text ../OpenFiles/Libraries/basic_files.so
+.py open_text ../OpenFiles/Libraries/basic_files.so
+.sh open_text ../OpenFiles/Libraries/basic_files.so
+.md open_text ../OpenFiles/Libraries/basic_files.so
