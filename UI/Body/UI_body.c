@@ -1,4 +1,5 @@
 #include "UI_body.h"
+#include "../colors.h"
 
 #include <ncurses.h>
 #include <stdlib.h>
@@ -12,12 +13,6 @@ enum Offsets {
 };
 
 #define SELECTED_STYLE COLOR_PAIR(SELECTED_FILE) | A_BOLD
-
-enum Colors {
-    SELECTED_FILE = 5, CASUAL_FILE = 6,
-    SELECTED_DIR = 7, CASUAL_DIR = 8,
-    SELECTED_OTHER = 9, CASUAL_OTHER = 10
-};
 
 enum {
     SPECIFIER_NUM_SIZE = 7
@@ -154,7 +149,7 @@ static void show_entities_size(WINDOW *ptr, int cur, int width, const Entity *en
     for (int i = begin; i < end; ++i) {
         int style = get_style(entities[indices[i]].type, i == cur);
         wattron(ptr, style);
-        if (entities[i].type == DT_DIR) {
+        if (entities[indices[i]].type == DT_DIR) {
             mvwprintw(ptr, 1 + i - begin, width - SIZE_R, "DIR");
         } else {
             mvwprintw(ptr, 1 + i - begin, width - SIZE_R, "%zu", entities[indices[i]].size);

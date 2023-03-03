@@ -3,6 +3,10 @@
 
 #include "../Manager/InfoHolder/InfoHolder.h"
 
+enum Colors {
+    DEFAULT_COLOR = 4
+};
+
 void init_UI();
 void draw_UI(const InfoHolder *info);
 void destroy_UI();

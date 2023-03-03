@@ -1,13 +1,10 @@
 #include "UI_Legendl.h"
+#include "../colors.h"
 
 #include <ncurses.h>
 
 enum Offsets {
     HEIGHT = 3, NAME_L = 3, MODIFIED_R = 13, SIZE_R = 34
-};
-
-enum Colors {
-    DEFAULT_COLOR = 4
 };
 
 static void init_colors() {

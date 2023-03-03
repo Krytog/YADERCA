@@ -50,7 +50,7 @@ void destroy_UI() {
 static void refresh_all(const InfoHolder *info) {
     // legend line can't update
     update_UI_body(UI_ptrs.body, terminal_size.width, terminal_size.height, info);
-    update_UI_bufferl(UI_ptrs.buffer_line, NULL);
+    update_UI_bufferl(UI_ptrs.buffer_line, info);
     refresh();
     wrefresh(UI_ptrs.legend_line);
     wrefresh(UI_ptrs.buffer_line);

@@ -13,9 +13,12 @@ void info_holder_init(InfoHolder *info_holder) {
     info_holder->entities_num = 0;
     info_holder->entities = NULL;
     info_holder->selected_line = 0;
-    info_holder->show_hidden = 0;
+    info_holder->show_hidden = 1;
     info_holder->not_hidden_info.indices = NULL;
     info_holder->not_hidden_info.indices = 0;
+    info_holder->buffer.path[0] = '\0';
+    info_holder->buffer.name[0] = '\0';
+    info_holder->buffer.mode = 0;
 }
 
 void decrease_selected_line(InfoHolder *info_holder) {
@@ -42,4 +45,10 @@ size_t get_upper_limit(InfoHolder *info_holder) {
         return info_holder->entities_num;
     }
     return info_holder->not_hidden_info.num;
+}
+
+void info_holder_buffer_clear(InfoHolder *info_holder) {
+    info_holder->buffer.path[0] = '\0';
+    info_holder->buffer.name[0] = '\0';
+    info_holder->buffer.mode = 0;
 }

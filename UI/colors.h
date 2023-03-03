@@ -1,0 +1,9 @@
+#ifndef colors_H_INCLUDED
+#define colors_H_INCLUDED
+
+enum Colors {
+    DEFAULT_COLOR = 2, EMPTY_BUFFER = 3, SPECIAL_BUFFER = 4, SELECTED_FILE = 5, CASUAL_FILE = 6,
+    SELECTED_DIR = 7, CASUAL_DIR = 8, SELECTED_OTHER = 9, CASUAL_OTHER = 10
+};
+
+#endif

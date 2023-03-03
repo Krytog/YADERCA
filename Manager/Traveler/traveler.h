@@ -8,8 +8,10 @@
 
 void go_into_dir(PathHolder *current_path, char *name, InfoHolder *info_holder, int *active);
 
-void delete_file(PathHolder *current_path, char *name, InfoHolder *infoHolder, int *active);
-
 void switch_show_hidden(InfoHolder *info);
+
+void delete_file(PathHolder *current_path, char *name, InfoHolder *infoHolder, int *active);
+void add_to_buffer(PathHolder *current_path, char *name, InfoHolder *info_holder, int *active, int mode);
+void clever_insert_from_buffer(PathHolder *current_path, InfoHolder *info_holder, int *active);
 
 #endif

@@ -6,9 +6,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #define BACK ".."
 #define HIDDEN_SIGN '.'
+
+#define COPY_BUFFER_SIZE 4096
 
 static void on_error(const char *message, int *active) {
     perror(message);
@@ -109,4 +113,77 @@ void switch_show_hidden(InfoHolder *info_holder) {
         info_holder->show_hidden = 1;
     }
     info_holder->selected_line = 0;
+}
+
+static int copy_file_from_buffer(PathHolder *current_path, InfoHolder *info_holder, int *active) {
+    update_current_path(current_path, info_holder->buffer.name, active);
+    current_path->current_path[--current_path->end_pos] = '\0';
+    int dist = open(current_path->current_path, O_RDONLY);
+    if (dist != -1) {
+        close(dist);
+        delete_last_entry_from_path(current_path);
+        return EXIT_FAILURE;
+    }
+    int src = open(info_holder->buffer.path, O_RDONLY);
+    if (src == -1) {
+        delete_last_entry_from_path(current_path);
+        return EXIT_FAILURE;
+    }
+    dist = open(current_path->current_path, O_CREAT | O_WRONLY);
+    if (dist == -1) {
+        close(src);
+        delete_last_entry_from_path(current_path);
+        return EXIT_FAILURE;
+    }
+    char copy_buffer[COPY_BUFFER_SIZE];
+    ssize_t bytes_read;
+    while ((bytes_read = read(src, &copy_buffer, COPY_BUFFER_SIZE)) > 0) {
+        ssize_t bytes_written;
+        char *offset_buffer = copy_buffer;
+        do {
+            bytes_written = write(dist, offset_buffer, bytes_read);
+            if (bytes_written >= 0) {
+                bytes_read -= bytes_written;
+                offset_buffer += bytes_written;
+            }
+        } while (bytes_read > 0);
+    }
+    close(src);
+    close(dist);
+    struct stat st;
+    stat(info_holder->buffer.path, &st);
+    chmod(current_path->current_path, st.st_mode);
+    delete_last_entry_from_path(current_path);
+    return EXIT_SUCCESS;
+}
+
+void add_to_buffer(PathHolder *current_path, char *name, InfoHolder *info_holder, int *active, int mode) {
+    snprintf(info_holder->buffer.name, NAME_MAX, "%s", name);
+    update_current_path(current_path, name, active);
+    snprintf(info_holder->buffer.path, PATH_MAX, "%s", current_path->current_path);
+    info_holder->buffer.path[current_path->end_pos - 1] = '\0';
+    delete_last_entry_from_path(current_path);
+    info_holder->buffer.mode = mode;
+}
+
+void clever_insert_from_buffer(PathHolder *current_path, InfoHolder *info_holder, int *active) {
+    switch (info_holder->buffer.mode) {
+        case BUFFER_MODE_EMPTY: {
+            return;
+        }
+        case BUFFER_MODE_COPY: {
+            copy_file_from_buffer(current_path, info_holder, active);
+            update_info(current_path, info_holder, active);
+            break;
+        }
+        case BUFFER_MODE_CUT: {
+            if (copy_file_from_buffer(current_path, info_holder, active)) {
+                return;
+            }
+            remove(info_holder->buffer.path);
+            info_holder_buffer_clear(info_holder);
+            update_info(current_path, info_holder, active);
+            break;
+        }
+    }
 }
