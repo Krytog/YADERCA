@@ -201,16 +201,8 @@ static void clear_before_update(WINDOW *ptr, int height) {
     }
 }
 
-#include <fcntl.h>
-#include <unistd.h>
-
 void update_UI_body(WINDOW *ptr, int terminal_width, int terminal_height, const InfoHolder *info) {
     int height = terminal_height - 2 * HEIGHT;
-
-    int fd = open("log.txt", O_CREAT | O_APPEND | O_WRONLY, S_IRWXU);
-    dprintf(fd, "paedfjo: %zu\n", info->not_hidden_info.num);
-    close(fd);
-
     if (info->show_hidden) {
         set_begin_and_end(info->selected_line, height, info->entities_num);
     } else {
