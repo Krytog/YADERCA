@@ -4,7 +4,7 @@
 #include <ncurses.h>
 #include <string.h>
 
-#define VERSION "YADERCA v1.1"
+#define VERSION "YADERCA v1.3"
 
 #define NON_KEYWORD "NONE"
 #define COPY_KEYWORD "CPY->"

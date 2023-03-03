@@ -31,8 +31,10 @@ static void init_colors() {
     init_pair(CASUAL_FILE, COLOR_WHITE, -1);
     init_pair(SELECTED_DIR, COLOR_MAGENTA, COLOR_BLUE);
     init_pair(CASUAL_DIR, COLOR_MAGENTA, -1);
-    init_pair(SELECTED_OTHER, COLOR_RED, COLOR_BLUE);
-    init_pair(CASUAL_OTHER, COLOR_RED, COLOR_BLUE);
+    init_pair(SELECTED_LINK, COLOR_YELLOW, COLOR_BLUE);
+    init_pair(CASUAL_LINK, COLOR_YELLOW, -1);
+    init_pair(SELECTED_FIFO, COLOR_RED, COLOR_BLUE);
+    init_pair(CASUAL_FIFO, COLOR_RED, -1);
 }
 
 static void init_specifier(int width) {
@@ -94,8 +96,14 @@ static int get_style(unsigned type, int selected) {
             case DT_DIR: {
                 return COLOR_PAIR(SELECTED_DIR) | A_BOLD;
             }
+            case DT_FIFO: {
+                return COLOR_PAIR(SELECTED_FIFO) | A_BOLD;
+            }
+            case DT_LNK: {
+                return COLOR_PAIR(SELECTED_LINK) | A_BOLD;
+            }
             default: {
-                return COLOR_PAIR(SELECTED_OTHER) | A_BOLD;
+                return COLOR_PAIR(SELECTED_FILE) | A_BOLD;
             }
         }
     }
@@ -106,8 +114,14 @@ static int get_style(unsigned type, int selected) {
         case DT_DIR: {
             return COLOR_PAIR(CASUAL_DIR);
         }
+        case DT_FIFO: {
+            return COLOR_PAIR(CASUAL_FIFO);
+        }
+        case DT_LNK: {
+            return COLOR_PAIR(CASUAL_LINK);
+        }
         default: {
-            return COLOR_PAIR(CASUAL_OTHER);
+            return COLOR_PAIR(CASUAL_FILE);
         }
     }
 }
