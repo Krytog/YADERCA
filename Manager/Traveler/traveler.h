@@ -7,7 +7,7 @@
 #include <dirent.h>
 
 void go_into_dir(PathHolder *path, char *name, InfoHolder *info_holder, int *active);
-void try_open_entity(PathHolder *current_path, char *name, InfoHolder *info_holder, int *active);
+void try_open_entity(PathHolder *current_path, InfoHolder *info_holder, int *active);
 
 void switch_show_hidden(InfoHolder *info);
 

@@ -47,6 +47,7 @@ void decrease_selected_line(InfoHolder *info_holder);
 void increase_selected_line(InfoHolder *info_holder);
 
 char *get_selected_name(InfoHolder *info_holder);
+unsigned get_selected_type(InfoHolder *info_holder);
 size_t get_upper_limit(InfoHolder *info_holder);
 
 void info_holder_buffer_clear(InfoHolder *info_holder);

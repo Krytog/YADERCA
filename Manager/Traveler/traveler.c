@@ -189,16 +189,17 @@ void clever_insert_from_buffer(PathHolder *current_path, InfoHolder *info_holder
     }
 }
 
-void try_open_entity(PathHolder *current_path, char *name, InfoHolder *info_holder, int *active) {
+void go_into_file(PathHolder *current_path, char *name, int *active) {
     update_current_path(current_path, name, active);
-    DIR *try_open = opendir(current_path->current_path);
-    if (try_open) {
-        closedir(try_open);
-        delete_last_entry_from_path(current_path);
-        go_into_dir(current_path, name, info_holder, active);
+    current_path->current_path[--current_path->end_pos] = '\0';
+    open_file(current_path->current_path);
+    delete_last_entry_from_path(current_path);
+}
+
+void try_open_entity(PathHolder *current_path, InfoHolder *info_holder, int *active) {
+    if (get_selected_type(info_holder) == DT_DIR) {
+        go_into_dir(current_path, get_selected_name(info_holder), info_holder, active);
     } else {
-        current_path->current_path[--current_path->end_pos] = '\0';
-        open_file(current_path->current_path);
-        delete_last_entry_from_path(current_path);
+        go_into_file(current_path, get_selected_name(info_holder), active);
     }
 }

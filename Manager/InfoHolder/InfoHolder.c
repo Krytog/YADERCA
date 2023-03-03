@@ -52,3 +52,10 @@ void info_holder_buffer_clear(InfoHolder *info_holder) {
     info_holder->buffer.name[0] = '\0';
     info_holder->buffer.mode = 0;
 }
+
+unsigned get_selected_type(InfoHolder *info_holder) {
+    if (info_holder->show_hidden) {
+        return info_holder->entities[info_holder->selected_line].type;
+    }
+    return info_holder->entities[info_holder->not_hidden_info.indices[info_holder->selected_line]].type;
+}
