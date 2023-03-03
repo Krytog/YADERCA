@@ -25,3 +25,6 @@ Notice that the default CMakeLists.txt enables address sanitizers.
 
 # Opening Files
 The directory OpenFiles contains CONFIG.txt, this file mustn't be moved. To let the program open new file extensions, just add the line of type "<.EXTENSION> <OPEN_FUNCTION_NAME> <DYNAMIC_LIBRARY_NAME>". The program supposes that open functions have the signature of "int(const char *)". It's highly recommended that all open functions start a new terminal, instead of using the one YADERCA uses, as it can cause UI artifacts.
+
+# Список сделанных допов:
+1)Вырезать-вставить, 2)Копировать-вставить (в Guidance подробности), 3)Произвольный размер терминала, 4)Открытие файлов по расширению (в секции выше подробности), 5)Дополнительная подстветка типов, 6)Переключение показа скрытых файлов.
